@@ -7,3 +7,9 @@ body { background: var(--page-bg); }
 .card { background: var(--card-bg); border-color: var(--border); }
 
 textarea#answerInput { background: #0f1115; color: #e6e8eb; }
+
+#question {
+  white-space: pre-wrap;
+  line-height: 1.6;
+}
+
