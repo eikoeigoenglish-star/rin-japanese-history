@@ -67,18 +67,52 @@ function buildQuizSet(pool, n) {
   return sample(pool, count);
 }
 
+// 追加：latest を読む
+function getFlagsFromQuery() {
+  const sp = new URLSearchParams(location.search);
+  const lv = sp.get("level");
+  const latest = sp.get("latest") === "1";
+  const level = (lv === "1" || lv === "2") ? lv : null;
+
+  // 無効な level は除去（既存の処理と同等）
+  if (lv !== null && !level) {
+    sp.delete("level");
+    const url = `${location.pathname}${sp.toString() ? "?" + sp.toString() : ""}${location.hash}`;
+    history.replaceState(null, "", url);
+  }
+  return { level, latest };
+}
+
+function sliceLatest25Percent(arr) {
+  if (!Array.isArray(arr) || arr.length === 0) return [];
+  // 末尾25%（最低1問は確保）
+  const start = Math.max(0, Math.floor(arr.length * 0.75));
+  return arr.slice(start);
+}
+
 // ===== Flow =====
 function init() {
-  level = getLevelFromQueryStrict();
+  const flags = getFlagsFromQuery();
+  const level = flags.level;
+  const latest = flags.latest;
 
   if (!level) {
+    // レベル選択画面表示
     $levelPicker.classList.remove("d-none");
     $quizSection.classList.add("d-none");
     $resultSection.classList.add("d-none");
     return;
   }
 
-  pool = (level === "1" ? window.QUIZ_REKIKEN1 : window.QUIZ_REKIKEN2) || [];
+  // データ読み込み
+  let pool = (level === "1" ? window.QUIZ_REKIKEN1 : window.QUIZ_REKIKEN2) || [];
+  if (latest) {
+    pool = sliceLatest25Percent(pool);
+    // バッジ表示
+    const $badgeFilter = document.getElementById("badgeFilter");
+    if ($badgeFilter) $badgeFilter.classList.remove("d-none");
+  }
+
   if (!Array.isArray(pool) || pool.length === 0) {
     $levelPicker.classList.add("d-none");
     $quizSection.classList.remove("d-none");
@@ -156,7 +190,12 @@ function showResult() {
 
   // 同じ級で再挑戦
   const u = new URL(location.href);
-  u.search = new URLSearchParams({ level }).toString();
+  const params = new URLSearchParams();
+  params.set('level', (new URLSearchParams(location.search)).get('level') || '1');
+  if ((new URLSearchParams(location.search)).get('latest') === '1') {
+    params.set('latest', '1');
+  }
+  u.search = params.toString();
   $retryLink.href = u.toString();
 }
 
