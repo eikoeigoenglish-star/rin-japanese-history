@@ -93,23 +93,6 @@
   <script src="./questions-rekiken1.js?v=rekiken013"></script>
   <script src="./questions-rekiken2.js?v=rekiken013"></script>
   <script type="module" src="./app-rekiken.js?v=rekiken013"></script>
-  <script>
-  // レベル選択のリンクをフックして latest=1 を付与
-  document.addEventListener('DOMContentLoaded', () => {
-    const onlyLatest = document.getElementById('onlyLatest');
-    document.querySelectorAll('#levelPicker a[data-level]').forEach(a => {
-      a.addEventListener('click', (e) => {
-        if (!onlyLatest) return; // 念のため
-        const wantLatest = !!onlyLatest.checked;
-        if (!wantLatest) return; // 通常のリンク遷移
-        e.preventDefault();
-        const url = new URL(a.getAttribute('href'), location.href);
-        url.searchParams.set('latest', '1');
-        location.href = url.toString();
-      });
-    });
-  });
-</script>
 
 </body>
 </html>
