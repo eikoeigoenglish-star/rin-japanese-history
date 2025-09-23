@@ -21,20 +21,34 @@
     <section id="levelPicker" class="card shadow-sm mb-3 d-none">
       <div class="card-body">
         <p class="mb-2">受験級を選んでください。</p>
-        <div class="d-flex gap-2">
-          <a class="btn btn-outline-primary" href="?level=1">日本史1級</a>
-          <a class="btn btn-outline-primary" href="?level=2">日本史2級</a>
+
+    <!-- ここを追加：最新25%だけに絞るチェック -->
+        <div class="form-check mb-3">
+          <input class="form-check-input" type="checkbox" id="onlyLatest">
+          <label class="form-check-label" for="onlyLatest">
+            新規追加の問題を受ける（最新25%を出題）
+          </label>
         </div>
+
+        <div class="d-flex gap-2">
+          <!-- data-level でフックし、latest=1 を必要に応じて付与 -->
+          <a class="btn btn-outline-primary" href="?level=1" data-level="1">日本史1級</a>
+          <a class="btn btn-outline-primary" href="?level=2" data-level="2">日本史2級</a>
       </div>
-    </section>
+    </div>
+  </section>
 
     <!-- quiz -->
-    <section id="quizSection" class="card shadow-sm d-none" aria-live="polite">
-      <div class="card-body">
-        <div class="d-flex justify-content-between align-items-center mb-2">
+   <!-- 出題カードのバッジ行に “最新25%” 用バッジを追加 -->
+  <section id="quizSection" class="card shadow-sm d-none" aria-live="polite">
+    <div class="card-body">
+      <div class="d-flex justify-content-between align-items-center mb-2 flex-wrap gap-2">
+        <div class="d-flex align-items-center gap-2">
           <div id="badgeLevel" class="badge text-bg-secondary">級</div>
-          <div id="progress" class="small text-secondary">Q1 / 10</div>
+          <div id="badgeFilter" class="badge text-bg-info d-none">最新25%</div>
         </div>
+        <div id="progress" class="small text-secondary">Q1 / 10</div>
+      </div>
         <h2 id="question" class="h5 mb-3">読み込み中…</h2>
 
         <div class="mb-3">
@@ -79,5 +93,23 @@
   <script src="./questions-rekiken1.js?v=rekiken012"></script>
   <script src="./questions-rekiken2.js?v=rekiken012"></script>
   <script type="module" src="./app-rekiken.js?v=rekiken012"></script>
+  <script>
+  // レベル選択のリンクをフックして latest=1 を付与
+  document.addEventListener('DOMContentLoaded', () => {
+    const onlyLatest = document.getElementById('onlyLatest');
+    document.querySelectorAll('#levelPicker a[data-level]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        if (!onlyLatest) return; // 念のため
+        const wantLatest = !!onlyLatest.checked;
+        if (!wantLatest) return; // 通常のリンク遷移
+        e.preventDefault();
+        const url = new URL(a.getAttribute('href'), location.href);
+        url.searchParams.set('latest', '1');
+        location.href = url.toString();
+      });
+    });
+  });
+</script>
+
 </body>
 </html>
