@@ -101,14 +101,26 @@ function init() {
     $levelPicker.classList.remove("d-none");
     $quizSection.classList.add("d-none");
     $resultSection.classList.add("d-none");
+
+    // ★ 追加：級ボタンに latest=1 を付ける（CSP対応・インライン不要）
+    const onlyLatest = document.getElementById('onlyLatest');
+    document.querySelectorAll('#levelPicker a[data-level]').forEach(a => {
+      a.addEventListener('click', (e) => {
+        if (!onlyLatest || !onlyLatest.checked) return; // 通常遷移
+        e.preventDefault();
+        const url = new URL(a.getAttribute('href'), location.href);
+        url.searchParams.set('latest', '1');
+        location.href = url.toString();
+      });
+    });
+
     return;
   }
 
-  // データ読み込み
+  // データ読み込み…
   let pool = (level === "1" ? window.QUIZ_REKIKEN1 : window.QUIZ_REKIKEN2) || [];
   if (latest) {
     pool = sliceLatest25Percent(pool);
-    // バッジ表示
     const $badgeFilter = document.getElementById("badgeFilter");
     if ($badgeFilter) $badgeFilter.classList.remove("d-none");
   }
