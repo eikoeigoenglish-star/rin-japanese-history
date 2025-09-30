@@ -13,6 +13,7 @@ const $nextBtn      = document.getElementById("nextBtn");
 const $scoreText    = document.getElementById("scoreText");
 const $tbody        = document.getElementById("reviewTableBody");
 const $retryLink    = document.getElementById("retryLink");
+const LATEST_RATIO = 0.20;
 
 // ===== 状態 =====
 let level = null;                  // "1" or "2"
@@ -83,10 +84,10 @@ function getFlagsFromQuery() {
   return { level, latest };
 }
 
-function sliceLatest25Percent(arr) {
+function sliceLatest(arr) {
   if (!Array.isArray(arr) || arr.length === 0) return [];
   // 末尾25%（最低1問は確保）
-  const start = Math.max(0, Math.floor(arr.length * 0.75));
+  const start = Math.max(0, Math.floor(arr.length * (1 - LATEST_RATIO)));
   return arr.slice(start);
 }
 
@@ -120,7 +121,7 @@ function init() {
   // データ読み込み…
   let pool = (level === "1" ? window.QUIZ_REKIKEN1 : window.QUIZ_REKIKEN2) || [];
   if (latest) {
-    pool = sliceLatest25Percent(pool);
+    pool = sliceLatest(pool);
     const $badgeFilter = document.getElementById("badgeFilter");
     if ($badgeFilter) $badgeFilter.classList.remove("d-none");
   }
