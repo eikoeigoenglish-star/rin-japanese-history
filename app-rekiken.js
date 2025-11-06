@@ -213,11 +213,17 @@ function showResult() {
 
   // 同じ級で再挑戦
   const u = new URL(location.href);
-  const params = new ();
-  params.set('level', (new URLSearchParams(location.search)).get('level') || '1');
+  const params = new URLSearchParams();  // ★ 修正
+
+  // 現在の level（拡張後の "1","2","kama","hikari" すべて許容）
+  const currentLevel = (new URLSearchParams(location.search)).get('level') || DEFAULT_LEVEL_KEY;
+  params.set('level', currentLevel);
+
+  // latest=1 を継承
   if ((new URLSearchParams(location.search)).get('latest') === '1') {
-    params.set('latest', '1');
+  params.set('latest', '1');
   }
+
   u.search = params.toString();
   $retryLink.href = u.toString();
 }
