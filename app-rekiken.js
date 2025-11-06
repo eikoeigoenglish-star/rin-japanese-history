@@ -104,7 +104,7 @@ function sliceLatest(arr) {
 // ===== Flow =====
 function init() {
   const flags = getFlagsFromQuery();
-  const level = flags.level;
+  level = flags.level;   // ★ グローバルへ代入（上で let level = null; を定義済み）
   const latest = flags.latest;
 
   if (!level) {
@@ -184,9 +184,8 @@ function showResult() {
   $resultSection.classList.remove("d-none");
 
   // ★ 追加：どの級/テーマかを結果画面に表示
-  const paramsNow = new URLSearchParams(location.search);
-  const levelKey = paramsNow.get('level') || DEFAULT_LEVEL_KEY;
-  const label = DATASETS[levelKey] ? DATASETS[levelKey].label : "";
+  const levelKey = level || DEFAULT_LEVEL_KEY;             // ★ さっき保持した値を使う
+  const label = DATASETS[levelKey] ? DATASETS[levelKey].label : "不明なセット";
   const $resultBadgeLevel = document.getElementById("resultBadgeLevel");
   if ($resultBadgeLevel) {
     $resultBadgeLevel.textContent = label || "不明なセット";
@@ -227,7 +226,7 @@ function showResult() {
 
   // 現在の level（拡張後の "1","2","kama","hikari" すべて許容）
   const currentLevel = (new URLSearchParams(location.search)).get('level') || DEFAULT_LEVEL_KEY;
-  params.set('level', currentLevel);
+  params.set('level', level || DEFAULT_LEVEL_KEY);   // ★ グローバル level を採用
 
   // latest=1 を継承
   if ((new URLSearchParams(location.search)).get('latest') === '1') {
