@@ -1,6 +1,16 @@
 // ===== 設定 =====
 const QUIZ_COUNT = 10;  // 出題数
 
+// ===== 追加：データセット定義 =====
+const DATASETS = {
+  "1":      { label: "日本史1級",       ref: () => window.QUIZ_REKIKEN1 || [] },
+  "2":      { label: "日本史2級",       ref: () => window.QUIZ_REKIKEN2 || [] },
+  "kama":   { label: "鎌倉殿の13人",    ref: () => window.QUIZ_KAMAKURA13 || [] },
+  "hikari": { label: "光る君へ",        ref: () => window.QUIZ_HIKARU || [] }
+};
+// 既定は従来どおり 1 級
+const DEFAULT_LEVEL_KEY = "1";
+
 // ===== 要素 =====
 const $levelPicker  = document.getElementById("levelPicker");
 const $quizSection  = document.getElementById("quizSection");
@@ -26,17 +36,18 @@ let score = 0;
 // ===== Util =====
 function getLevelFromQueryStrict() {
   const sp = new URLSearchParams(location.search);
-  const lv = sp.get("level");
-  if (lv === "1" || lv === "2") return lv;
+  const lv = (sp.get("level") || "").toLowerCase();
+  if (lv && DATASETS[lv]) return lv;
 
   // 無効な値が付いていたら URL から除去（誤ブクマ防止）
-  if (lv !== null) {
+  if (lv !== null && lv !== "") {
     sp.delete("level");
     const url = `${location.pathname}${sp.toString() ? "?" + sp.toString() : ""}${location.hash}`;
     history.replaceState(null, "", url);
   }
   return null;
 }
+
 function shuffle(a) {
   const arr = a.slice();
   for (let i = arr.length - 1; i > 0; i--) {
@@ -71,12 +82,11 @@ function buildQuizSet(pool, n) {
 // 追加：latest を読む
 function getFlagsFromQuery() {
   const sp = new URLSearchParams(location.search);
-  const lv = sp.get("level");
+  const raw = (sp.get("level") || "").toLowerCase();
   const latest = sp.get("latest") === "1";
-  const level = (lv === "1" || lv === "2") ? lv : null;
+  const level = DATASETS[raw] ? raw : null;
 
-  // 無効な level は除去（既存の処理と同等）
-  if (lv !== null && !level) {
+  if (raw !== null && raw !== "" && !level) {
     sp.delete("level");
     const url = `${location.pathname}${sp.toString() ? "?" + sp.toString() : ""}${location.hash}`;
     history.replaceState(null, "", url);
@@ -119,7 +129,7 @@ function init() {
   }
 
   // データ読み込み…
-  let pool = (level === "1" ? window.QUIZ_REKIKEN1 : window.QUIZ_REKIKEN2) || [];
+  let pool = (DATASETS[level] ? DATASETS[level].ref() : []) || [];
   if (latest) {
     pool = sliceLatest(pool);
     const $badgeFilter = document.getElementById("badgeFilter");
@@ -133,7 +143,7 @@ function init() {
     return;
   }
 
-  $badgeLevel.textContent = `日本史${level}級`;
+  $badgeLevel.textContent = DATASETS[level] ? DATASETS[level].label : "（不明なセット）";
   quiz = buildQuizSet(pool, QUIZ_COUNT);
   answers = Array(quiz.length).fill("");
   idx = 0; score = 0;
@@ -203,7 +213,7 @@ function showResult() {
 
   // 同じ級で再挑戦
   const u = new URL(location.href);
-  const params = new URLSearchParams();
+  const params = new ();
   params.set('level', (new URLSearchParams(location.search)).get('level') || '1');
   if ((new URLSearchParams(location.search)).get('latest') === '1') {
     params.set('latest', '1');
