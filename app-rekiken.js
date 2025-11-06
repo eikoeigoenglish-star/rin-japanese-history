@@ -183,6 +183,16 @@ function showResult() {
   $quizSection.classList.add("d-none");
   $resultSection.classList.remove("d-none");
 
+  // ★ 追加：どの級/テーマかを結果画面に表示
+  const paramsNow = new URLSearchParams(location.search);
+  const levelKey = paramsNow.get('level') || DEFAULT_LEVEL_KEY;
+  const label = DATASETS[levelKey] ? DATASETS[levelKey].label : "";
+  const $resultBadgeLevel = document.getElementById("resultBadgeLevel");
+  if ($resultBadgeLevel) {
+    $resultBadgeLevel.textContent = label || "不明なセット";
+    $resultBadgeLevel.classList.remove("d-none");
+  }
+
   $scoreText.textContent = `得点：${score} / ${quiz.length}`;
   $tbody.innerHTML = "";
 
