@@ -23,7 +23,7 @@ const $nextBtn      = document.getElementById("nextBtn");
 const $scoreText    = document.getElementById("scoreText");
 const $tbody        = document.getElementById("reviewTableBody");
 const $retryLink    = document.getElementById("retryLink");
-const LATEST_RATIO = 0.20;
+const LATEST_RATIO = 0.10;
 
 // ===== 状態 =====
 let level = null;                  // "1" or "2"
